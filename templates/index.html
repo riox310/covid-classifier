@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Image Classification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .file-input {
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>COVID-19 Image Classification</h1>
+        <form class="upload-form" id="uploadForm">
+            <div class="file-input">
+                <input type="file" id="image" name="file" accept="image/*" required>
+            </div>
+            <button type="submit">Classify Image</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('image');
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('result');
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `
+                    <h3>Prediction Result:</h3>
+                    <p>Class: ${result.prediction}</p>
+                    <p>Confidence: ${(result.confidence * 100).toFixed(2)}%</p>
+                `;
+            } catch (error) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = 'Error processing the image. Please try again.';
+            }
+        });
+    </script>
+</body>
+</html> 
